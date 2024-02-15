@@ -25,9 +25,13 @@ const uploadNewImage: NextApiHandler = (req, res) => {
     if (err) return res.status(500).json({ error: err.message });
     if (!files.image) return res.status(500).json({ error: err.message });
     const imageFile = files.image[0];
-    await cloudinary.uploader.upload(imageFile.filepath, {
-      folder: "dev-blogs",
-    });
+    const { secure_url, url } = await cloudinary.uploader.upload(
+      imageFile.filepath,
+      {
+        folder: "dev-blogs",
+      }
+    );
+    res.json({ image: secure_url });
   });
 };
 
