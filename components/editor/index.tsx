@@ -15,6 +15,7 @@ import ActionButton from "../common/ActionButton";
 import ThumbnailSelector from "./ThumbnailSelector";
 
 export interface FinalPost extends SeoResult {
+  id?: string;
   title: string;
   content: string;
   thumbnail?: File | string;
@@ -124,7 +125,9 @@ const Editor: FC<Props> = ({
   };
 
   const updateThumbnail = (file: File) => {
+    console.log("updateThumb", file);
     setPost({ ...post, thumbnail: file });
+    console.log("post ", post);
   };
 
   useEffect(() => {

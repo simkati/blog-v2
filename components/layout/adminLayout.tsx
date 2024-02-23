@@ -32,7 +32,7 @@ const AdminLayout: FC<Props> = ({ title, children }): JSX.Element => {
         <AdminNav navItems={navItems} />
         <div className="flex-1 p-4">{children}</div>
         <Link
-          href="/admin/post/create"
+          href="/admin/posts/create"
           className="bg-secondary-dark dark:bg-secondary-light text-primary dark:text-primary-dark fixed z-10 right-10 bottom-10 rounded-full hover:scale-90 shadow-sm transition"
         >
           <AiOutlineFileAdd size={24}></AiOutlineFileAdd>

@@ -1,23 +1,26 @@
 import { NextApiRequest } from "next";
 import formidable from "formidable";
 
-interface FormidablePromise {
+interface FormidablePromise<T> {
   files: formidable.Files;
-  body: formidable.Fields;
+  body: T;
 }
 
-export const readFile = (req: NextApiRequest): Promise<FormidablePromise> => {
+export const readFile = <T extends object>(
+  req: NextApiRequest
+): Promise<FormidablePromise<T>> => {
   const form = formidable();
   return new Promise((resolve, reject) => {
     form.parse(req, (err, fields, files) => {
       if (err) reject(err);
-      let fieldsObject = {};
 
+      // fields value are array
+      let fieldsObject = {};
       for (const [key, value] of Object.entries(fields)) {
         if (value) fieldsObject = { ...fieldsObject, [key]: value[0] };
       }
 
-      resolve({ files, body: fieldsObject });
+      resolve({ files, body: fieldsObject as T });
     });
   });
 };
