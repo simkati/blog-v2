@@ -1,11 +1,11 @@
-import dbConnect from "@/lib/dbConnect";
 import { NextApiHandler } from "next";
+import dbConnect from "../../../lib/dbConnect";
 import Joi from "joi";
-import { postValidationSchema, validateSchema } from "@/lib/validator";
-import { readFile } from "@/lib/utils";
-import Post from "@/models/Post";
+import { postValidationSchema, validateSchema } from "../../../lib/validator";
+import { readFile } from "../../../lib/utils";
+import Post from "../../../models/Post";
 import formidable from "formidable";
-import cloudinary from "@/lib/cloudinary";
+import cloudinary from "../../../lib/cloudinary";
 
 export const config = {
   api: { bodyParser: false },
@@ -18,42 +18,41 @@ const handler: NextApiHandler = async (req, res) => {
       await dbConnect();
       res.json({ ok: true });
     }
-    case "POST": {
+    case "POST":
       return createNewPost(req, res);
-    }
   }
 };
 
 const createNewPost: NextApiHandler = async (req, res) => {
   const { files, body } = await readFile(req);
 
-  let tag: string[] = [];
-  if (body.tags) {
-    tag = JSON.parse(body.tags as unknown as string);
-  }
+  let tags = [];
 
-  const error = validateSchema(postValidationSchema, { ...body, tags: tag });
+  // tags will be in string form so converting to array
+  if (body.tags) tags = JSON.parse(body.tags as string);
+
+  const error = validateSchema(postValidationSchema, { ...body, tags });
   if (error) return res.status(400).json({ error });
 
   const { title, content, slug, meta } = body;
 
   await dbConnect();
-  const alreadyExist = await Post.findOne({ slug });
-  if (alreadyExist)
-    return res.status(400).json({ error: "Slug need to be unique" });
+  const alreadyExits = await Post.findOne({ slug });
+  if (alreadyExits)
+    return res.status(400).json({ error: "Slug need to be unique!" });
 
+  // create new post
   const newPost = new Post({
     title,
     content,
     slug,
     meta,
-    tag,
-    author: "6348acd2e1a47ca32e79f46f",
+    tags,
   });
 
-  const thumbnail = files.thumbnail as unknown as formidable.File;
+  // uploading thumbnail if there is any
+  const thumbnail = files.thumbnail as formidable.File;
   if (thumbnail) {
-    console.log("thumbnail");
     const { secure_url: url, public_id } = await cloudinary.uploader.upload(
       thumbnail.filepath,
       {
@@ -62,6 +61,7 @@ const createNewPost: NextApiHandler = async (req, res) => {
     );
     newPost.thumbnail = { url, public_id };
   }
+
   await newPost.save();
 
   res.json({ post: newPost });

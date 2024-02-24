@@ -12,14 +12,15 @@ const Image: FC<Props> = ({ src, selected, onClick }): JSX.Element => {
   return (
     <div
       onClick={onClick}
-      className="rounded overflow-hidden cursor-pointer relative w-[200px] h-[200px]"
+      className="relative rounded overflow-hidden cursor-pointer"
     >
       <NextImage
         src={src}
+        width={200}
+        height={200}
         alt="gallery"
-        layout="fill"
         objectFit="cover"
-        className="bg-primary-dark hover:scale-110 transition"
+        className="bg-secondary-light hover:scale-110 transition"
       />
       <div className="absolute top-2 left-2">
         <CheckMark visible={selected || false} />

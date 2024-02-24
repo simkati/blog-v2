@@ -1,8 +1,8 @@
 import { FC, ReactNode, useState } from "react";
 
 interface Props {
-  options: { label: string; onClick: () => void }[];
-  head: JSX.Element;
+  options: { label: string; onClick(): void }[];
+  head: ReactNode;
 }
 
 const DropdownOptions: FC<Props> = ({ head, options }): JSX.Element => {

@@ -2,9 +2,7 @@ import { FC, useCallback, useState } from "react";
 import { BsBoxArrowUpRight, BsPencilSquare } from "react-icons/bs";
 import { BiUnlink } from "react-icons/bi";
 import { BubbleMenu, Editor } from "@tiptap/react";
-import Link from "@tiptap/extension-link";
-import LinkForm, { linkOption } from "./linkForm";
-import { getFocusedEditor } from "../EditorUtils";
+import LinkForm, { linkOption } from "./LinkForm";
 
 interface Props {
   editor: Editor;
@@ -29,7 +27,9 @@ const EditLink: FC<Props> = ({ editor }): JSX.Element => {
   };
 
   const handleSubmit = ({ url, openInNewTab }: linkOption) => {
-    getFocusedEditor(editor)
+    editor
+      .chain()
+      .focus()
       .unsetLink()
       .setLink({ href: url, target: openInNewTab ? "_blank" : "" })
       .run();
@@ -57,11 +57,7 @@ const EditLink: FC<Props> = ({ editor }): JSX.Element => {
         initialState={getInitialState()}
       />
       {!showEditForm && (
-        <div
-          className="rounded bg-primary dark:bg-primary-dark
-       text-primary-dark dark:text-primary shadow-secondary-dark shadow-md 
-       p-3 flex items-center space-x-6 z-50"
-        >
+        <div className="rounded bg-primary dark:bg-primary-dark text-primary-dark dark:text-primary shadow-secondary-dark shadow-md p-3 flex items-center space-x-6 z-50">
           <button onClick={handleOnLinkOpenClick}>
             <BsBoxArrowUpRight />
           </button>

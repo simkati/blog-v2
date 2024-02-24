@@ -1,5 +1,5 @@
-import { NextApiRequest } from "next";
 import formidable from "formidable";
+import { NextApiRequest } from "next";
 
 interface FormidablePromise<T> {
   files: formidable.Files;
@@ -14,13 +14,7 @@ export const readFile = <T extends object>(
     form.parse(req, (err, fields, files) => {
       if (err) reject(err);
 
-      // fields value are array
-      let fieldsObject = {};
-      for (const [key, value] of Object.entries(fields)) {
-        if (value) fieldsObject = { ...fieldsObject, [key]: value[0] };
-      }
-
-      resolve({ files, body: fieldsObject as T });
+      resolve({ files, body: fields as T });
     });
   });
 };

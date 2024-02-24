@@ -32,8 +32,8 @@ const ThumbnailSelector: FC<Props> = ({
       <input
         type="file"
         hidden
-        id="thumbnail"
         accept="image/jpg, image/png, image/jpeg"
+        id="thumbnail"
         onChange={handleChange}
       />
       <label htmlFor="thumbnail">

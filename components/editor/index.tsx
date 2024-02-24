@@ -1,14 +1,15 @@
 import { ChangeEventHandler, FC, useEffect, useState } from "react";
 import { useEditor, EditorContent, getMarkRange, Range } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import ToolBar from "./ToolBar";
 import Underline from "@tiptap/extension-underline";
 import Placeholder from "@tiptap/extension-placeholder";
-import TipTapImage from "@tiptap/extension-image";
 import Link from "@tiptap/extension-link";
-import EditLink from "./Link/EditLink";
 import Youtube from "@tiptap/extension-youtube";
-import GalleryModal, { imageSelectionResult } from "./GalleryModal";
+import TipTapImage from "@tiptap/extension-image";
+
+import ToolBar from "./ToolBar";
+import EditLink from "./Link/EditLink";
+import GalleryModal, { ImageSelectionResult } from "./GalleryModal";
 import axios from "axios";
 import SEOForm, { SeoResult } from "./SeoForm";
 import ActionButton from "../common/ActionButton";
@@ -58,7 +59,8 @@ const Editor: FC<Props> = ({
     formData.append("image", image);
     const { data } = await axios.post("/api/image", formData);
     setUploading(false);
-    setImages([{ src: data.secure_url }, ...images]);
+
+    setImages([data, ...images]);
   };
 
   const editor = useEditor({
@@ -69,7 +71,9 @@ const Editor: FC<Props> = ({
         autolink: false,
         linkOnPaste: false,
         openOnClick: false,
-        HTMLAttributes: { target: "" },
+        HTMLAttributes: {
+          target: "",
+        },
       }),
       Placeholder.configure({
         placeholder: "Type something",
@@ -98,12 +102,12 @@ const Editor: FC<Props> = ({
       },
       attributes: {
         class:
-          "prose prose-lg focus-outline-none dark:prose-invert max-w-full mx-auto h-full",
+          "prose prose-lg focus:outline-none dark:prose-invert max-w-full mx-auto h-full",
       },
     },
   });
 
-  const handleImageSelection = (result: imageSelectionResult) => {
+  const handleImageSelection = (result: ImageSelectionResult) => {
     editor
       ?.chain()
       .focus()
@@ -116,19 +120,12 @@ const Editor: FC<Props> = ({
     onSubmit({ ...post, content: editor.getHTML() });
   };
 
-  const updateTitle: ChangeEventHandler<HTMLInputElement> = ({ target }) => {
+  const updateTitle: ChangeEventHandler<HTMLInputElement> = ({ target }) =>
     setPost({ ...post, title: target.value });
-  };
 
-  const updateSeoValue = (result: SeoResult) => {
-    setPost({ ...post, ...result });
-  };
+  const updateSeoValue = (result: SeoResult) => setPost({ ...post, ...result });
 
-  const updateThumbnail = (file: File) => {
-    console.log("updateThumb", file);
-    setPost({ ...post, thumbnail: file });
-    console.log("post ", post);
-  };
+  const updateThumbnail = (file: File) => setPost({ ...post, thumbnail: file });
 
   useEffect(() => {
     if (editor && selectionRange) {
@@ -154,7 +151,7 @@ const Editor: FC<Props> = ({
     <>
       <div className="p-3 dark:bg-primary-dark bg-primary transition">
         <div className="sticky top-0 z-10 dark:bg-primary-dark bg-primary">
-          {/* Thumbnail Selector and submit button */}
+          {/* Thumbnail Selector and Submit Button */}
           <div className="flex items-center justify-between mb-3">
             <ThumbnailSelector
               initialValue={post.thumbnail as string}
@@ -165,50 +162,44 @@ const Editor: FC<Props> = ({
                 busy={busy}
                 title={btnTitle}
                 onClick={handleSubmit}
+                disabled={busy}
               />
             </div>
           </div>
 
-          {/* Title input */}
+          {/* Title Input */}
           <input
             type="text"
-            className="bg-transparent w-full border-0 border-b
-         border-secondary-dark dark:border-secondary-light text-3xl font-semibold
-          italic text-primary-dark dark:text-primary mb-3 py-2 outline-none"
+            className="py-2 outline-none bg-transparent w-full border-0 border-b-[1px] border-secondary-dark dark:border-secondary-light text-3xl font-semibold italic text-primary-dark dark:text-primary mb-3"
             placeholder="Title"
             onChange={updateTitle}
             value={post.title}
           />
           <ToolBar
             editor={editor}
-            onOpenImageClick={() => {
-              setShowGallery(true);
-            }}
+            onOpenImageClick={() => setShowGallery(true)}
           />
-          <div className="border h-[1px]w-full bg-secondary-dark dark:bg-secondary-light my-3"></div>
+          <div className="h-[1px] w-full bg-secondary-dark dark:bg-secondary-light my-3" />
         </div>
 
         {editor ? <EditLink editor={editor} /> : null}
         <EditorContent editor={editor} className="min-h-[300px]" />
-        <div className="border h-[1px]w-full bg-secondary-dark dark:bg-secondary-light my-3"></div>
+        <div className="h-[1px] w-full bg-secondary-dark dark:bg-secondary-light my-3" />
         <SEOForm
           onChange={updateSeoValue}
           title={post.title}
           initialValue={seoInitialValue}
         />
       </div>
+
       <GalleryModal
         visible={showGallery}
-        onClose={() => {
-          setShowGallery(false);
-        }}
+        onClose={() => setShowGallery(false)}
         onSelect={handleImageSelection}
         images={images}
         onFileSelect={handleImageUpload}
         uploading={uploading}
-      >
-        <></>
-      </GalleryModal>
+      />
     </>
   );
 };

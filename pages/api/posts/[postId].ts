@@ -1,9 +1,9 @@
-import { NextApiHandler } from "next";
-import Post from "@/models/Post";
-import { readFile } from "@/lib/utils";
-import { postValidationSchema, validateSchema } from "@/lib/validator";
-import cloudinary from "@/lib/cloudinary";
 import formidable from "formidable";
+import { NextApiHandler } from "next";
+import cloudinary from "../../../lib/cloudinary";
+import { readFile } from "../../../lib/utils";
+import { postValidationSchema, validateSchema } from "../../../lib/validator";
+import Post from "../../../models/Post";
 
 export const config = {
   api: { bodyParser: false },
@@ -35,12 +35,10 @@ const updatePost: NextApiHandler = async (req, res) => {
   const { files, body } = await readFile<IncomingPost>(req);
 
   let tags = [];
-  if (body.tags) {
-    tags = JSON.parse(body.tags as unknown as string);
-  }
+  // tags will be in string form so converting to array
+  if (body.tags) tags = JSON.parse(body.tags as string);
 
   const error = validateSchema(postValidationSchema, { ...body, tags });
-
   if (error) return res.status(400).json({ error });
 
   const { title, content, meta, slug } = body;
@@ -50,9 +48,8 @@ const updatePost: NextApiHandler = async (req, res) => {
   post.tags = tags;
   post.slug = slug;
 
-  //update thumbnail
-
-  const thumbnail = files.thumbnail as unknown as formidable.File;
+  // update thumbnail only if there is any
+  const thumbnail = files.thumbnail as formidable.File;
   if (thumbnail) {
     const { secure_url: url, public_id } = await cloudinary.uploader.upload(
       thumbnail.filepath,
@@ -61,9 +58,13 @@ const updatePost: NextApiHandler = async (req, res) => {
       }
     );
 
+    // #1-cond. => the post can already have thumbnail
+    // so remove old, upload new image and then update record inside DB.
     const publicId = post.thumbnail?.public_id;
     if (publicId) await cloudinary.uploader.destroy(publicId);
 
+    // #2-cond. => the post can be without thumbnail
+    // just upload image and update record inside DB.
     post.thumbnail = { url, public_id };
   }
 

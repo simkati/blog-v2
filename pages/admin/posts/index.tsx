@@ -1,16 +1,10 @@
 import { NextPage } from "next";
-import AdminLayout from "@/components/layout/adminLayout";
+import AdminLayout from "../../../components/layout/AdminLayout";
 
 interface Props {}
 
 const Posts: NextPage<Props> = () => {
-  return (
-    <div>
-      <AdminLayout>
-        <div>This is posts</div>
-      </AdminLayout>
-    </div>
-  );
+  return <AdminLayout>posts</AdminLayout>;
 };
 
 export default Posts;
